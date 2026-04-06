@@ -1,0 +1,60 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_OSX_ARCHITECTURES=arm64
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Verify
+        run: |
+          echo "Built binaries:"
+          ls -lh build/dyld_* build/machocheck
+          echo
+          echo "Smoke test:"
+          build/dyld_info -platform /usr/lib/dyld
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dyld-tools-macos-arm64
+          path: |
+            build/dyld_info
+            build/dyld_nm
+            build/machocheck
+            build/dyld_inspect
+            build/dyld_usage
+            build/dyld_closure_util
+            build/dyld_shared_cache_util
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/dyld_info
+            build/dyld_nm
+            build/machocheck
+            build/dyld_inspect
+            build/dyld_usage
+            build/dyld_closure_util
+            build/dyld_shared_cache_util
+          generate_release_notes: true
