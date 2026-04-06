@@ -121,8 +121,8 @@ static Error validFPAC(const char* name, std::span<const uint64_t> addrs,
 
 Error LinkerOptimizationHints::valid(std::span<const MappedSegment> segments, uint64_t loadAddress) const
 {
-
-    return std::move(lohErr);
+    // TODO: upstream bug — lohErr was never declared. Return none for now.
+    return Error::none();
 }
 
 } // namespace mach_o

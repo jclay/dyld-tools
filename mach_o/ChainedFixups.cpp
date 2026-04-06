@@ -1222,6 +1222,12 @@ public:
     }
 };
 
+// Default implementation — subclasses override with format-specific encoding
+Error ChainedFixups::PointerFormat::writeChainEntry(const Fixup&, const void*, uint64_t, std::span<const MappedSegment*>) const
+{
+    return Error("writeChainEntry not implemented for this pointer format");
+}
+
 Error ChainedFixups::PointerFormat::badChainDistance(const Fixup& fixup, intptr_t delta) const
 {
     return Error("distance between fixups (%ld) is not encodable in chain for fixup at %.*s+0x%0lX",
